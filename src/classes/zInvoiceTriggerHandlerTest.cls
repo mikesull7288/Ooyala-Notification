@@ -5,6 +5,7 @@ private class zInvoiceTriggerHandlerTest {
 
         Account acct = Z_TestFactory.makeAccount();
         Zuora__CustomerAccount__c zacct = Z_TestFactory.makeZAccount(acct);
+        insert zacct;
         Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
         insert testInv;
 
@@ -17,6 +18,7 @@ private class zInvoiceTriggerHandlerTest {
         // Implement test code
         Account acct = Z_TestFactory.makeAccount();
         Zuora__CustomerAccount__c zacct = Z_TestFactory.makeZAccount(acct);
+        insert zacct;
         zacct.surpressNotifications__c = true;
         update zacct;
         Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
@@ -29,6 +31,7 @@ private class zInvoiceTriggerHandlerTest {
         // Implement test code
         Account acct = Z_TestFactory.makeAccount();
         Zuora__CustomerAccount__c zacct = Z_TestFactory.makeZAccount(acct);
+        insert zacct;
         zacct.isDunning__c = true;
         update zacct;
         Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
@@ -41,6 +44,7 @@ private class zInvoiceTriggerHandlerTest {
         // Implement test code
         Account acct = Z_TestFactory.makeAccount();
         Zuora__CustomerAccount__c zacct = Z_TestFactory.makeZAccount(acct);
+        insert zacct;
         update zacct;
         Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
         testInv.Zuora__Balance2__c = 0;
