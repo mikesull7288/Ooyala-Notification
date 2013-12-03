@@ -35,7 +35,6 @@ public with sharing class zUsageBatchableTest {
         insert zUsage;
 
         // run methods in test mode
-        
         Test.startTest();
         zUsageBatchable nlb = new zUsageBatchable();
         Database.executeBatch(nlb); 

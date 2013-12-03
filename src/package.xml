@@ -1,24 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>*</members>
+        <members>ZInvoiceTriggerHandler</members>
+        <members>Z_TestFactory</members>
+        <members>zCustomerAccountTriggerHandler</members>
+        <members>zCustomerAccountTriggerHandlerTest</members>
+        <members>zInvoiceListComponentControlerTest</members>
+        <members>zInvoiceListComponentController</members>
+        <members>zInvoiceTriggerHandlerTest</members>
+        <members>zQuoteTriggerHandler</members>
+        <members>zQuoteTriggerHandlerTest</members>
+        <members>zSubProdChargeUpdateBatchable</members>
+        <members>zSubProdChargeUpdateBatchableTest</members>
+        <members>zSubProdChargeUpdateScheduler</members>
+        <members>zSubscriptionChargeHandler</members>
+        <members>zSubscriptionChargeHandlerTest</members>
+        <members>zUsageBatchable</members>
+        <members>zUsageBatchableTest</members>
+        <members>zUsageHandler</members>
+        <members>zUsageScheduler</members>
         <name>ApexClass</name>
     </types>
     <types>
-        <members>*</members>
+        <members>zInvoiceListComponent</members>
         <name>ApexComponent</name>
     </types>
     <types>
-        <members>*</members>
-        <name>ApexPage</name>
-    </types>
-    <types>
-        <members>*</members>
+        <members>ZInvoiceTrigger</members>
+        <members>zCustomerAccountTriger</members>
+        <members>zQuoteTrigger</members>
         <name>ApexTrigger</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>StaticResource</name>
     </types>
     <version>28.0</version>
 </Package>
