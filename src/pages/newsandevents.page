@@ -1,0 +1,22 @@
+<apex:page >
+<style>
+.content h2{
+    background-position:0 -95px !important;
+}
+</style>
+
+<div class="content">
+  <h2><span>News &amp; Events</span></h2>
+  
+  <div id="news-n-events">
+      <div class="inner">
+          <ul>
+              <li><a href="http://ooyala.com/about/press" target="_blank">Press</a></li>
+              <li><a href="http://ooyala.com/about/events" target="_blank">Events</a></li>
+              <li><a href="http://videomind.ooyala.com" target="_blank">VideoMind Blog</a></li>
+              <li><a href="http://videomind.ooyala.com/webinars" target="_blank">Webinars</a></li>
+          </ul>
+      </div>
+  </div>
+</div>
+</apex:page>

@@ -1,0 +1,32 @@
+<apex:component access="global" controller="zInvoiceListComponentController">
+  <apex:attribute name="ZuoraAccount" type="String" assignTo="{!AttributeZuoraAccount}" description="Zuora Account" />
+
+  <apex:dataTable value="{!InvoiceList}" var="Invoice" border="1" cellpadding="5">
+      <apex:column >
+          <apex:facet name="header">Invoice Number</apex:facet>
+          <apex:outputText value="{!Invoice.Name}"/>
+      </apex:column>
+      <apex:column >
+          <apex:facet name="header">Invoice Balance</apex:facet>
+          <apex:outputText value="{!Invoice.Zuora__Balance2__c}"/>
+      </apex:column>
+      <apex:column >
+          <apex:facet name="header">Invoice Date</apex:facet>
+          <apex:outputText value="{0,date,MM/dd/yyyy}" > <apex:param value="{!Invoice.Zuora__InvoiceDate__c}" />
+          </apex:outputText>
+      </apex:column>
+      <apex:column >
+          <apex:facet name="header">Payment Terms</apex:facet>
+          <apex:outputText value="{!Invoice.Zuora__PaymentTerm__c}"/>
+      </apex:column>
+      <apex:column >
+          <apex:facet name="header">Invoice Due Date</apex:facet>
+          <apex:outputText value="{0,date,MM/dd/yyyy}" > <apex:param value="{!Invoice.Zuora__DueDate__c}"/>
+          </apex:outputText>
+      </apex:column>
+      <apex:column >
+          <apex:facet name="header">Days Past Due</apex:facet>
+          <apex:outputText value="{!Invoice.Days_Past_Due__c}"/>
+      </apex:column>
+  </apex:dataTable>
+</apex:component>

@@ -1,0 +1,11 @@
+<apex:page >
+<br>This page is for you to share what you are seeing in the field regarding competitor moves, news, and competitive best practices with the sales team.  You can also access this group in Yammer or in the Sales Homepage.
+</br>
+<script data-app-id="hyB2pTvrL36Y50py8EWj6A"
+src="https://assets.yammer.com/platform/yam.js"></script>
+<script>
+yam.connect.embedFeed(
+      { container: '#embedded-feed', network: 'ooyala.com', feedType: 'group', feedId: '525253'});    
+</script>   
+<div id="embedded-feed"></div>
+</apex:page>

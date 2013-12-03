@@ -1,0 +1,28 @@
+<apex:page >
+<style>
+.content h2{
+    background-position:0 -290px !important;
+}
+</style>
+<div class="content">
+  <h2><span>Support</span></h2>
+  
+  <div id="support">
+      <div class="inner">
+          <ul>
+              <li>Ooyala Documentation
+                  <ul>
+                      <li><a href="http://support.ooyala.com/documentation/concepts/book_gettingstarted.html" target="_blank">Backlot Getting Started Guide</a></li>
+                      <li><a href="http://support.ooyala.com/documentation/concepts/book_dev.html" target="_blank">Backlot Developer Guide</a></li>
+                      <li><a href="http://support.ooyala.com/documentation/concepts/book_api.html" target="_blank">Backlot API Reference</a></li>
+                      <li><a href="http://support.ooyala.com/otv" target="_blank">Ooyala TV</a></li>
+                      <li><a href="http://support.ooyala.com/documentation/concepts/book_reference.html" target="_blank">General Reference</a></li>
+                      <li><a href="http://support.ooyala.com/articles" target="_blank">Articles</a></li>
+                      <li><a href="http://support.ooyala.com/contact" target="_blank">Contact Support Form</a></li>
+                  </ul>
+              </li>
+          </ul>
+      </div>
+  </div>
+</div>
+</apex:page>

@@ -1,0 +1,17 @@
+<apex:page standardController="Case" extensions="CaseExt">
+	<apex:form >
+	
+		<apex:pageBlock title="Results From JIRA" id="block" mode="edit">
+			<apex:pageMessages />
+ 
+			<apex:pageBlockSection >
+				<apex:pageBlockSectionItem >
+					<div>
+					{!result}
+					</div>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection> 
+		</apex:pageBlock>
+	
+	</apex:form>	
+</apex:page>

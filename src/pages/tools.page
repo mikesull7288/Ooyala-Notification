@@ -1,0 +1,2 @@
+<apex:page action="/sfc/#search" tabStyle="partner_portal_tools__tab">
+</apex:page>

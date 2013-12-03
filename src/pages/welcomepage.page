@@ -1,0 +1,133 @@
+<apex:page >
+ <style>
+    .inner h2{
+        font-size:130%
+    }
+    
+    #events h2{
+        background-position: 0px -257px, left center;
+    } 
+    #site-overview h2{
+        background:none;
+        padding:0px;
+    }
+    #site-overview h2 span{
+        padding:0px;
+        background:none;
+    }
+    #whats-new h2{
+        background-position: 0px -323px, left center;
+    }
+    .block{
+        margin-bottom:20px;
+    }
+    h1{
+        display:block;
+        
+        background: url('/servlet/servlet.ImageServer?id=01570000001KkGc&amp;oid=00D70000000JHJq') repeat-y scroll right top #FBFBFB;
+        border: 1px solid #DBDBDB;
+        border-radius: 5px 5px 0 0;
+        -moz-border-radius:5px 5px 0 0;
+        -webkit-border-radius:5px 5px 0 0;
+        margin-bottom: 0;
+        padding-bottom: 20px;
+        padding-top: 20px;
+        font-size:1.6923em;
+        line-height:32px;
+        font-weight:normal;
+        color:#676767;
+        border-bottom:0px;
+    }
+    h1 span{
+        display:block;
+        padding-left:30px;
+        background-image: url('/servlet/servlet.ImageServer?id=01570000001KkG3&amp;oid=00D70000000JHJq');
+        display: block;
+        margin-left: 32px;
+        padding-left: 40px;
+        height:33px;
+        background-repeat:no-repeat;
+        background-position:0px -356px;
+    }
+    #site-overview .content{
+        border: 1px solid #DBDBDB;
+        border-radius: 0 0 5px 5px;
+        -moz-border-radius:0 0 5px 5px;
+        -webkit-border-radius:0 0 5px 5px;
+        padding:30px;
+        background:#F8F8F8;
+        color:#676767;
+    }
+    
+ </style>
+ 
+  <div id="site-overview" class="block">
+      <div class="inner">
+          <h1><span>Welcome to Ooyala Partner Portal</span></h1>
+          <div class="content">
+              <h2><span>Partner Portal Overview</span></h2>
+              <div class="overview">
+                  Welcome to the Ooyala Partner Portal, a partner-only website created exclusively to provide Ooyala channel partners with the information, tools, 
+                  and resources needed to help enable you to successfully sell Ooyala Backlot services and solutions.  In addition to this 
+                  Home page, the site is made up of three other sections: 
+                  Sales Tools, Training, Support, and a Calendar. A brief description of each of these elements is as follows: 
+                  <ul>
+                    <p><li><b>Sales Tools:</b> Looking for sales and marketing tools?  Product information?  The Documents section is the first place you should look. Here 
+                    you will find things like sales presentations, product positioning and messaging, product descriptions, and more.         </li></p>
+               
+                    <p><li><b>Training:</b> To help get you quickly up and selling, this section features the Ooyala Partner Sales Enablement Plan, a self-guided
+                    training plan designed exclusively for Ooyala channel partners. <i>(Note: If this is your first time logging into the portal, and/or you are still ramping up with Ooyala, 
+                    completing the enablement plan is your best first step to quickly getting up and running with Ooyala. </i></li></p>
+                    
+                   <p> <li><b>Support:</b> Access to resources, documentation, and information, including the Backlot User Guide, API documentation, and Ooyala SDK to enable you and your 
+                    customers to fully leverage the Ooyala OVP.           </li></p>
+                   <p><li><b>Calendar:</b> To find which events Ooyala will be attending, information for webinars we have planned, and partner-specific training and events, 
+                  <a href="https://na5.salesforce.com/00U/c?cType=1&cal=Partner+Portal&cal_lkid=02370000000ZaaQ&cal_lkold=Partner+Portal&cal_lspf=1&md0=2012&md1=2"> Click Here to view
+                   the Ooyala Calendar</a> .  </li></p>
+                    
+                    
+                    
+                    <p> <center> If you have any questions, comments, or feedback, please <a href="mailto:partnerportal@ooyala.com">send email to partnerportal@ooyala.com</a> </center> </p>
+                    
+                   </ul>
+                  
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  <div id="whats-new" class="block" style="display:none;">
+      <div class="inner">
+          <div class="content">
+              <h2><span>Whats New</span></h2>
+              <div class="overview">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sed diam vel massa varius consequat. Nullam placerat sagittis dictum. Quisque nibh nibh, egestas eu pulvinar sed, consequat id arcu. Praesent ultricies hendrerit eros ac hendrerit. Sed tortor leo, pulvinar vitae mattis id, ultricies id dolor. Quisque dapibus felis nec eros consectetur ut placerat metus tincidunt. Donec tincidunt, ipsum nec accumsan vulputate, nisl tellus accumsan metus, pulvinar ultrices neque leo et augue. Maecenas in mattis velit. Nulla vel arcu lorem, ut vulputate magna. Nulla porta dolor eu risus iaculis blandit. Praesent eget erat tellus. Morbi non diam eget nisl dapibus aliquet at nec purus. Mauris id mollis erat.
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  <div id="events" class="block" style="display:none;">
+      <div class="inner">
+          <div class="content">
+              <h2><span>Events</span></h2>
+              <div class="overview">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sed diam vel massa varius consequat. Nullam placerat sagittis dictum. Quisque nibh nibh, egestas eu pulvinar sed, consequat id arcu. Praesent ultricies hendrerit eros ac hendrerit. Sed tortor leo, pulvinar vitae mattis id, ultricies id dolor. Quisque dapibus felis nec eros consectetur ut placerat metus tincidunt. Donec tincidunt, ipsum nec accumsan vulputate, nisl tellus accumsan metus, pulvinar ultrices neque leo et augue. Maecenas in mattis velit. Nulla vel arcu lorem, ut vulputate magna. Nulla porta dolor eu risus iaculis blandit. Praesent eget erat tellus. Morbi non diam eget nisl dapibus aliquet at nec purus. Mauris id mollis erat.
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  
+  <div id="featured" class="block" style="display:none;">
+      <div class="inner">
+          <div class="content">
+              <h2><span>Featured</span></h2>
+              <div class="overview">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin sed diam vel massa varius consequat. Nullam placerat sagittis dictum. Quisque nibh nibh, egestas eu pulvinar sed, consequat id arcu. Praesent ultricies hendrerit eros ac hendrerit. Sed tortor leo, pulvinar vitae mattis id, ultricies id dolor. Quisque dapibus felis nec eros consectetur ut placerat metus tincidunt. Donec tincidunt, ipsum nec accumsan vulputate, nisl tellus accumsan metus, pulvinar ultrices neque leo et augue. Maecenas in mattis velit. Nulla vel arcu lorem, ut vulputate magna. Nulla porta dolor eu risus iaculis blandit. Praesent eget erat tellus. Morbi non diam eget nisl dapibus aliquet at nec purus. Mauris id mollis erat.
+              </div>
+          </div>
+      </div>
+  </div>
+  
+</apex:page>

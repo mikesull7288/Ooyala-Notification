@@ -1,0 +1,27 @@
+{
+    "folders": [
+        {
+            "path": "/Users/msullivan/Documents/workspaces/mavensmate/Ooyala-ReportingSandbox"
+        }
+    ], 
+    "settings": {
+        "auto_complete_triggers": [
+            {
+                "characters": ".", 
+                "selector": "source - comment"
+            }, 
+            {
+                "characters": ":", 
+                "selector": "text.html - comment"
+            }, 
+            {
+                "characters": "<", 
+                "selector": "text.html - comment"
+            }, 
+            {
+                "characters": " ", 
+                "selector": "text.html - comment"
+            }
+        ]
+    }
+}

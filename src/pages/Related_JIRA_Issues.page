@@ -1,0 +1,4 @@
+<apex:page standardController="Case"> 
+<apex:iframe id="jiraWindow" 
+src="https://jira.corp.ooyala.com/plugins/servlet/customware/connector/issue/4/Case/fetch.action?id={!$CurrentPage.parameters.id}"></apex:iframe> 
+</apex:page>

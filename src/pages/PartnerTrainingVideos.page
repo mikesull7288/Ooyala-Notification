@@ -1,0 +1,12 @@
+<apex:page >
+ 
+  <h6>Training Videos</h6>
+ <br></br>
+ <br></br>
+ Check out these videos from Ooyala, introducing our new product! For more information, contact training@ooyala.com.
+ <br></br>
+ <br></br>
+ 
+<script src="https://player.ooyala.com/player.js?browserPlacement=left200px&embedCode=dmbDN4NjrAFsLelbcJdXosZT2chTcKC8&height=400&videoPcode=t0NHg6ZZaWsHg8MmzBQxpY6HZBtX&width=825"></script><noscript><object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="ooyalaPlayer_4831996_1354583959" width="825" height="400" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"><param name="movie" value="https://player.ooyala.com/player.swf?embedCode=dmbDN4NjrAFsLelbcJdXosZT2chTcKC8&version=2" /><param name="bgcolor" value="#000000" /><param name="allowScriptAccess" value="always" /><param name="allowFullScreen" value="true" /><param name="flashvars" value="embedType=noscriptObjectTag&embedCode=dmbDN4NjrAFsLelbcJdXosZT2chTcKC8&videoPcode=t0NHg6ZZaWsHg8MmzBQxpY6HZBtX&browserPlacement=right200px" /><embed src="https://player.ooyala.com/player.swf?embedCode=dmbDN4NjrAFsLelbcJdXosZT2chTcKC8&version=2" bgcolor="#000000" width="825" height="400" name="ooyalaPlayer_4831996_1354583959" align="middle" play="false" loop="false" allowscriptaccess="always" allowfullscreen="true" type="application/x-shockwave-flash" flashvars="embedCode=dmbDN4NjrAFsLelbcJdXosZT2chTcKC8&videoPcode=t0NHg6ZZaWsHg8MmzBQxpY6HZBtX&browserPlacement=right200px" pluginspage="http://www.adobe.com/go/getflashplayer"></embed></object></noscript>
+<br></br>
+</apex:page>
