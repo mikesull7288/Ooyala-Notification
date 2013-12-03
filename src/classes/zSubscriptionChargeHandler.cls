@@ -121,24 +121,7 @@ public with sharing class zSubscriptionChargeHandler {
              zoql += '\'' + zChargeIdList[zChargeIdList.size()-1] + '\'';
              System.Debug('===== MS ===== single query is: ' + zoql);
              zoqlStatments.add(zoql);
-        } /*else {
-            // list is too big for one zquery need to break it into 2 sub queries
-            String zoql1 = zoql;
-            for(Integer i = 0; i < 100; i++){
-                zoql1 += '\'' + zChargeIdList[i] + '\' OR ChargeNumber = ';
-            }
-             zoql1 += '\'' + zChargeIdList[100] + '\'';
-             System.Debug('===== MS ===== first query is: ' + zoql1);
-             zoqlStatments.add(zoql1);
-
-             String zoql2 = zoql;
-            for(Integer i = 100; i < zChargeIdList.size()-1; i++){
-                zoql2 += '\'' + zChargeIdList[i] + '\' OR ChargeNumber = ';
-            }
-             zoql2 += '\'' + zChargeIdList[zChargeIdList.size()-1] + '\'';
-             System.Debug('===== MS ===== second query is: ' + zoql2);
-             zoqlStatments.add(zoql2);
-        }*/
+        } 
 
         return zoqlStatments;
 
@@ -155,7 +138,7 @@ public with sharing class zSubscriptionChargeHandler {
             zoql += '\'' + zChargeIdList[0] + '\'';
              System.Debug('===== MS ===== singular OveragePrice query is: ' + zoql);
             zoqlStatments.add(zoql); 
-        } else { //if(zChargeIdList.size() < 100) {
+        } else { 
              
             for(Integer i = 0; i < zChargeIdList.size()-1; i++){
                 zoql += '\'' + zChargeIdList[i] + '\' OR ChargeNumber = ';
@@ -163,24 +146,7 @@ public with sharing class zSubscriptionChargeHandler {
              zoql += '\'' + zChargeIdList[zChargeIdList.size()-1] + '\'';
              System.Debug('===== MS ===== single OveragePrice query is: ' + zoql);
              zoqlStatments.add(zoql);
-        } /*else {
-            // list is too big for one zquery need to break it into 2 sub queries
-            String zoql1 = zoql;
-            for(Integer i = 0; i < 100; i++){
-                zoql1 += '\'' + zChargeIdList[i] + '\' OR ChargeNumber = ';
-            }
-             zoql1 += '\'' + zChargeIdList[100] + '\'';
-             System.Debug('===== MS ===== first OveragePrice query is: ' + zoql1);
-             zoqlStatments.add(zoql1);
-
-             String zoql2 = zoql;
-            for(Integer i = 100; i < zChargeIdList.size()-1; i++){
-                zoql2 += '\'' + zChargeIdList[i] + '\' OR ChargeNumber = ';
-            }
-             zoql2 += '\'' + zChargeIdList[zChargeIdList.size()-1] + '\'';
-             System.Debug('===== MS ===== second OveragePrice query is: ' + zoql2);
-             zoqlStatments.add(zoql2);
-        }*/
+        } 
 
         return zoqlStatments;
      }
@@ -229,58 +195,20 @@ public with sharing class zSubscriptionChargeHandler {
             } catch (NullPointerException nullPointerException) {
                 System.debug('Exception on: ' + chargeId + ' [' + nullPointerException + ']');
             }
-            if(zuoraRatePlanCharge != null) {
-                //if((String) zuoraRatePlanCharge.getValue('BillingPeriod') == 'Month') {
-                if(zSubProdCharge.Zuora__RatePlanName__c.contains('Month')) {
-
-                    //Number of periods is 1
-                    //Total Included Units is "Subscription" RatePlan.IncludedUnits
-                    zSubProdCharge.Number_of_Period__c = 1;
-                    zSubProdCharge.Total_Included_Units__c = (Decimal) zuoraRatePlanCharge.getValue('IncludedUnits');
-
-                    System.debug('====== MS ====== updating zSubProdCharge: [' + zSubProdCharge + ']');
-
-                } else if(zSubProdCharge.Zuora__RatePlanName__c.contains('Annual')) {
-                //if((String) zuoraRatePlanCharge.getValue('BillingPeriod') == 'Annual') {
-
-                    //Number of periods is 12
-                    //Total Included Units is 12 * "Subscription" RatePlan.IncludedUnits
-                    zSubProdCharge.Number_of_Period__c = 12;
-                    zSubProdCharge.Total_Included_Units__c = zSubProdCharge.Number_of_Period__c * ((Decimal) zuoraRatePlanCharge.getValue('IncludedUnits'));
+            if(zuoraRatePlanCharge != null ) {
+            
+                Decimal includedUnits = (Decimal) zuoraRatePlanCharge.getValue('IncludedUnits');
+                Decimal numberOfPeriods = (Decimal) zuoraRatePlanCharge.getValue('NumberOfPeriods'); 
+                
+                if((includedUnits != null) && (numberOfPeriods != null)){
+                    zSubProdCharge.Number_of_Period__c = numberOfPeriods;
+                    zSubProdCharge.Total_Included_Units__c = zSubProdCharge.Number_of_Period__c * includedUnits;
 
                     System.debug('====== MS ====== updating zSubProdCharge: [' + zSubProdCharge + ']');
+                } else {
+                    System.debug('====== MS ====== ERROR setting Total_Included_Units - includedUnits: [' + includedUnits + ']  numberOfPeriods: [' + numberOfPeriods + ']');
+                }
 
-                } /* else if(zSubProdCharge.Zuora__RatePlanName__c.contains('Semi-Annual')) { 
-                //if((String) zuoraRatePlanCharge.getValue('BillingPeriod') == 'Semi-Annual') {
-
-                    //Number of periods is 6
-                    //Total Included Units is 6 * "Subscription" RatePlan.IncludedUnits
-                    zSubProdCharge.Number_of_Period__c = 6;
-                    zSubProdCharge.Total_Included_Units__c = zSubProdCharge.Number_of_Period__c * ((Decimal) zuoraRatePlanCharge.getValue('IncludedUnits'));
-
-                    System.debug('====== MS ====== updating zSubProdCharge: [' + zSubProdCharge + ']');
-
-                }*/
-                 else if(zSubProdCharge.Zuora__RatePlanName__c.contains('Quarter')) {
-                //else if((String) zuoraRatePlanCharge.getValue('BillingPeriod') == 'Quarter') {
-
-                    //Number of periods is 3
-                    //Total Included Units is 6 * "Subscription" RatePlan.IncludedUnits
-                    zSubProdCharge.Number_of_Period__c = 3;
-                    zSubProdCharge.Total_Included_Units__c = zSubProdCharge.Number_of_Period__c * ((Decimal) zuoraRatePlanCharge.getValue('IncludedUnits'));
-
-                    System.debug('====== MS ====== updating zSubProdCharge: [' + zSubProdCharge + ']');
-
-                } /*else if((String) zuoraRatePlanCharge.getValue('BillingPeriod') == 'Specific Months') {
-
-                    //Number of periods is 3
-                    //Total Included Units is 6 * "Subscription" RatePlan.IncludedUnits
-                    zSubProdCharge.Number_of_Period__c = (Decimal) zuoraRatePlanCharge.getValue('NumberOfPeriods');
-                    zSubProdCharge.Total_Included_Units__c = zSubProdCharge.Number_of_Period__c * ((Decimal) zuoraRatePlanCharge.getValue('IncludedUnits'));
-
-                    System.debug('====== MS ====== updating zSubProdCharge: [' + zSubProdCharge + ']');
-
-                } */
                 
                 zSubProdCharge.Zuora__Price__c = (Decimal) zuoraRatePlanOverageCharge.getValue('Price');
 

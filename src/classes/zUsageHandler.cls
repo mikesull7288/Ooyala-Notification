@@ -2,6 +2,8 @@ public with sharing class zUsageHandler {
      
     private List<Zuora.zObject> zUsageQueryResult;
     private Set<String> zuoraIdSet;
+    private Map<String, Zuora__CustomerAccount__c> zAccountMap;
+    Map<String, Zuora__SubscriptionProductCharge__c> zChargeMap;
     
     public zUsageHandler() {
     
@@ -18,9 +20,11 @@ public with sharing class zUsageHandler {
      */
     public List<Zuora_Usage__c> pullUsageFromZuora(List<String> zuoraAcctIDs){
         
-        // (1) get existing ZuoraUsages
+        // (1) get existing ZuoraUsages and Billing Accounts
         zuoraIdSet = new Set<String>();
-        zuoraIdSet.addAll(getZuoraIds());
+        zuoraIdSet.addAll(getZuoraIds(zuoraAcctIDs));
+        zChargeMap = getZuoraChargeMap(zuoraAcctIDs);
+        zAccountMap = getZuoraAccountMap(zuoraAcctIDs);
         
         // (2) build ZuoraQuery statements
         List<String> zoqlStatments = setupZOQL(zuoraAcctIDs);
@@ -125,8 +129,7 @@ public with sharing class zUsageHandler {
 
     private List<Zuora_Usage__c> processUsage(List<Zuora.zObject> usageList){
         List<Zuora_Usage__c> output = new List<Zuora_Usage__c>();
-        Map<String, Zuora__SubscriptionProductCharge__c> zChargeMap = getZuoraChargeMap();
-        Map<String, Zuora__CustomerAccount__c> zAccountMap = getZuoraAccountMap();
+        
         
         if(usageList.size() != 0) {
             
@@ -177,12 +180,12 @@ public with sharing class zUsageHandler {
      * Bulkify query FROM Zuora__SubscriptionProductCharge__c
      *
      */
-     private Map<String, Zuora__SubscriptionProductCharge__c> getZuoraChargeMap(){
+     private Map<String, Zuora__SubscriptionProductCharge__c> getZuoraChargeMap(List<String> zuoraAcctIDs){
          
          Map<String, Zuora__SubscriptionProductCharge__c> zChargeMap = new Map<String, Zuora__SubscriptionProductCharge__c>();
          
          List<Zuora__SubscriptionProductCharge__c> zCharges = new List<Zuora__SubscriptionProductCharge__c>();
-         zCharges = [SELECT ID, Zuora__Account__c, Zuora__ChargeNumber__c FROM Zuora__SubscriptionProductCharge__c WHERE Zuora__Type__c = 'Usage'];
+         zCharges = [SELECT ID, Zuora__Account__c, Zuora__ChargeNumber__c FROM Zuora__SubscriptionProductCharge__c WHERE Zuora__Type__c = 'Usage' AND Zuora__Subscription__r.Zuora__CustomerAccount__r.Zuora__Zuora_Id__c IN :zuoraAcctIDs];
          
          for(Zuora__SubscriptionProductCharge__c charge : zCharges){
              zChargeMap.put(charge.Zuora__ChargeNumber__c, charge);
@@ -196,12 +199,12 @@ public with sharing class zUsageHandler {
       * Bulkify query FROM Account
       *
       */
-     private Map<String, Zuora__CustomerAccount__c> getZuoraAccountMap(){
+     private Map<String, Zuora__CustomerAccount__c> getZuoraAccountMap(List<String> zuoraAcctIDs){
          
          Map<String, Zuora__CustomerAccount__c> zAccountMap = new Map<String, Zuora__CustomerAccount__c>();
          
          List<Zuora__CustomerAccount__c> zAccounts = new List<Zuora__CustomerAccount__c>();
-         zAccounts = [SELECT ID, Zuora__Account__c, Zuora__Zuora_Id__c FROM Zuora__CustomerAccount__c];
+         zAccounts = [SELECT ID, Zuora__Account__c, Zuora__Zuora_Id__c FROM Zuora__CustomerAccount__c WHERE Zuora__Zuora_Id__c IN :zuoraAcctIDs];
          
          for(Zuora__CustomerAccount__c account : zAccounts){
              zAccountMap.put(account.Zuora__Zuora_Id__c, account);
@@ -211,11 +214,10 @@ public with sharing class zUsageHandler {
          
      }
 
-    private List<String> getZuoraIds(){
+    private List<String> getZuoraIds(List<String> zuoraAcctIDs){
        List<String> ids = new List<String>();
        
-       List<Zuora_Usage__c> zuoraUsage = [SELECT Zuora_ID__c FROM Zuora_Usage__c];
-       
+       List<Zuora_Usage__c> zuoraUsage = [SELECT Zuora_ID__c FROM Zuora_Usage__c WHERE Billing_Account__r.Zuora__Zuora_Id__c IN :zuoraAcctIDs];
        for(Zuora_Usage__c usage : zuoraUsage){
            ids.add(usage.Zuora_ID__c);
        }
