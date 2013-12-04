@@ -19,6 +19,9 @@ public with sharing class zUsageHandler {
      * (5) Insert ZuoraUsages
      */
     public List<Zuora_Usage__c> pullUsageFromZuora(List<String> zuoraAcctIDs){
+    
+    System.Debug(logginglevel.DEBUG, '===== MS =====');
+    System.debug(logginglevel.INFO, '===== ms =====');
         
         // (1) get existing ZuoraUsages and Billing Accounts
         zuoraIdSet = new Set<String>();
@@ -49,24 +52,26 @@ public with sharing class zUsageHandler {
         zuoraUsagesToInsert = processUsage(zUsageQueryResult);
         
         // (5) insert ZuoraUsages
-        System.Debug(' ===== MS =====  Inserting new Usages: ' + zuoraUsagesToInsert);
+        System.debug(' ===== MS =====  Inserting new Usages: ' + zuoraUsagesToInsert);
         insert zuoraUsagesToInsert;
         return zuoraUsagesToInsert;
     }
 
     private List<String> setupZOQL(List<String> zuoraAcctIDs){
         List<String> zoqlStatments = new List<String>();
-        Datetime myDatetime = Datetime.now();
-        String myDatetimeStr = myDatetime.format('YYYY-MM-dd');
+        Datetime today = Datetime.now();
+        String todayDatetimeStr = today.format('YYYY-MM-dd');
+        Datetime yesterday = Datetime.now().addDays(-1);
+        String yesterdayDatetimeStr = yesterday.format('YYYY-MM-dd');
         String zoql = 'SELECT Id, AccountId, ChargeId, ChargeNumber, Description, Quantity, '
                     + 'StartDateTime, RbeStatus, UOM '
                     + 'FROM Usage '
                     + 'WHERE RbeStatus = \'Processed\''
-                    // + ' AND StartDateTime  <= \'2011-12-31T00:00:00-08:00\''.escapeXml()
-                    + ' AND AccountId = ';
+                    + ' AND StartDateTime  >= \'' + yesterdayDatetimeStr + 'T00:00:00-08:00\'';
+                    //+ ' AND AccountId = ';
         //String zoql = zoqlStart.escapeXml();
-        //System.Debug('===== MS ===== xml query is: ' + zoql);
-     
+        System.debug('===== MS ===== zoql query is: ' + zoql);
+     /*
         if (zuoraAcctIDs.size() == 1) {
              
             
@@ -81,12 +86,13 @@ public with sharing class zUsageHandler {
                 zoql1 += '\'' + zuoraAcctIDs[i] + '\' OR AccountId = ';
             }
              zoql1 += '\'' + zuoraAcctIDs[zuoraAcctIDs.size()-1] + '\'';
-             System.Debug('===== MS ===== long query is: ' + zoql1);
+             System.debug('===== MS ===== long query is: ' + zoql1);
              zoqlStatments.add(zoql1);
 
         }
+        */
         
-
+        zoqlStatments.add(zoql);
         return zoqlStatments;
 
     }
@@ -141,7 +147,7 @@ public with sharing class zUsageHandler {
             System.debug( '===== MS ===== SOAP Request = ' + Zuora.zApi.currentLogger.request );
             System.debug( '===== MS ===== SOAP Response = ' + Zuora.zApi.currentLogger.response );
             System.debug( '===== MS ===== logger = ' + Zuora.zApi.currentLogger.toString() );
-            System.debug(' ===== MS ===== queryResult size = ' + queryResult.size);
+            //System.debug(' ===== MS ===== queryResult size = ' + queryResult.size);
            return null;
         
         }
