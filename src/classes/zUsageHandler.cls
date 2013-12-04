@@ -92,12 +92,37 @@ public with sharing class zUsageHandler {
     }
 
     private List<Zuora.zObject> queryZuora(String zoql){
-        List<Zuora.zObject> queryResult = new List<Zuora.zObject>();
+        List<Zuora.zObject> queryResultList = new List<Zuora.zObject>();
+        
+        Zuora.zApi.QueryRequest qr = new Zuora.zApi.QueryRequest();
+        Zuora.zApi.QueryOptions qo = new Zuora.zApi.QueryOptions();
+        qo.batchSize = 20;
+        qo.caseSensitive = false;
+        qr.queryOptions = qo;
+        qr.zoql = zoql;
+        
+        Zuora.zApi.QueryResult queryResult;
+        
         try {
             Zuora.zApi zuoraApi = new Zuora.zApi();
+            Boolean done = false;
+            Zuora.zApi.QueryResult queryMoreResult;
+            Zuora.zApi.QueryMoreRequest qmr = new Zuora.zApi.QueryMoreRequest();
             if(!Test.isRunningTest()){
                 zuoraApi.zLogin();
-                queryResult = zuoraApi.zquery(zoql);
+                queryResult = zuoraApi.zquery(qr);
+                queryResultList.addAll(queryResult.records);
+                done = queryResult.done;
+                // If the result set is not complete, call zqueryMore() to get more records
+        
+                qmr.queryLocator = queryResult.queryLocator;
+                while (!done){
+                    queryMoreResult = zuoraApi.zqueryMore(qmr);
+                    queryResultList.addAll( queryMoreResult.records);
+                    done = queryMoreResult.done;
+                    qmr.queryLocator = queryMoreResult.queryLocator;
+                }
+
             }
             else{
                 //make a fake result
@@ -106,7 +131,7 @@ public with sharing class zUsageHandler {
                 testobj.setValue('ChargeNumber', 'test-123');
                 testobj.setValue('RbeStatus' , 'Processed');
                 testobj.setValue('AccountId', 'TESTbillAcct-00001');
-                queryResult.add(testobj);
+                queryResultList.add(testobj);
             }
         } catch (Zuora.zAPIException e) {
             System.debug('Error in query [' + zoql + '] ' + e);
@@ -114,17 +139,18 @@ public with sharing class zUsageHandler {
         } catch (Zuora.zRemoteException e) {
             System.debug('Error in query [' + zoql + '] ' + e);
             System.debug( '===== MS ===== SOAP Request = ' + Zuora.zApi.currentLogger.request );
-       System.debug( '===== MS ===== SOAP Response = ' + Zuora.zApi.currentLogger.response );
-       System.debug( '===== MS ===== logger = ' + Zuora.zApi.currentLogger.toString() );
-       System.debug(' ===== MS ===== queryResult size = ' + queryResult.size());
-           // return null;
+            System.debug( '===== MS ===== SOAP Response = ' + Zuora.zApi.currentLogger.response );
+            System.debug( '===== MS ===== logger = ' + Zuora.zApi.currentLogger.toString() );
+            System.debug(' ===== MS ===== queryResult size = ' + queryResult.size);
+           return null;
         
         }
-        System.debug(' ===== MS ===== queryResult size = ' + queryResult.size());
+        
         if(!Test.isRunningTest()){
+            System.debug(' ===== MS ===== queryResult size = ' + queryResult.size);
             System.debug( '===== MS ===== SOAP Response = ' + Zuora.zApi.currentLogger.response );
         }
-        return queryResult;
+        return queryResultList;
     }
 
     private List<Zuora_Usage__c> processUsage(List<Zuora.zObject> usageList){
