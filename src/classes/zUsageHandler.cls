@@ -30,20 +30,16 @@ public with sharing class zUsageHandler {
         zAccountMap = getZuoraAccountMap(zuoraAcctIDs);
         
         // (2) build ZuoraQuery statements
-        List<String> zoqlStatments = setupZOQL(zuoraAcctIDs);
+        String zoqlStatment = setupZOQL();
         
         // (3) query Zuora
         zUsageQueryResult = new List<Zuora.zObject>();
-        if(zoqlStatments != Null && zoqlStatments[0] != NULL)
+        
+        if(zoqlStatment != Null && zoqlStatment != '' && zoqlStatment.length() > 6)
         {
-            for(String zoql : zoqlStatments) {
-                if(zoql != Null && zoql != '' && zoql.length() > 6)
-                {
-                    if(queryZuora(zoql) != NULL)
-                    {
-                        zUsageQueryResult.addAll(queryZuora(zoql));
-                    }
-                }
+            if(queryZuora(zoqlStatment) != NULL)
+            {
+                zUsageQueryResult.addAll(queryZuora(zoqlStatment));
             }
         }
         
@@ -57,44 +53,20 @@ public with sharing class zUsageHandler {
         return zuoraUsagesToInsert;
     }
 
-    private List<String> setupZOQL(List<String> zuoraAcctIDs){
-        List<String> zoqlStatments = new List<String>();
-        Datetime today = Datetime.now();
-        String todayDatetimeStr = today.format('YYYY-MM-dd');
-        Datetime yesterday = Datetime.now().addDays(-1);
-        String yesterdayDatetimeStr = yesterday.format('YYYY-MM-dd');
+    private String setupZOQL(){
+        
+        Date today = Date.today();
+        Date lastMonth = Date.newInstance(today.year(), today.month()-1, 01);
+        String lastMonthStr = lastMonth.format();
         String zoql = 'SELECT Id, AccountId, ChargeId, ChargeNumber, Description, Quantity, '
                     + 'StartDateTime, RbeStatus, UOM '
                     + 'FROM Usage '
                     + 'WHERE RbeStatus = \'Processed\''
-                    + ' AND StartDateTime  >= \'' + yesterdayDatetimeStr + 'T00:00:00-08:00\'';
-                    //+ ' AND AccountId = ';
-        //String zoql = zoqlStart.escapeXml();
-        System.debug('===== MS ===== zoql query is: ' + zoql);
-     /*
-        if (zuoraAcctIDs.size() == 1) {
-             
-            
-             zoql += '\'' + zuoraAcctIDs[0] + '\'';
-             System.Debug('===== MS ===== single query is: ' + zoql);
-             
-             zoqlStatments.add(zoql);
-        } else {
-            // list is too big for one zquery need to break it into 2 sub queries
-            String zoql1 = zoql;
-            for(Integer i = 0; i < zuoraAcctIDs.size()-1; i++){
-                zoql1 += '\'' + zuoraAcctIDs[i] + '\' OR AccountId = ';
-            }
-             zoql1 += '\'' + zuoraAcctIDs[zuoraAcctIDs.size()-1] + '\'';
-             System.debug('===== MS ===== long query is: ' + zoql1);
-             zoqlStatments.add(zoql1);
-
-        }
-        */
+                    + ' AND CreatedDate  >= \'' + lastMonthStr + 'T00:00:00-08:00\'';
         
-        zoqlStatments.add(zoql);
-        return zoqlStatments;
-
+        System.debug('===== MS ===== zoql query is: ' + zoql);
+     
+        return zoql;
     }
 
     private List<Zuora.zObject> queryZuora(String zoql){
@@ -166,9 +138,6 @@ public with sharing class zUsageHandler {
         if(usageList.size() != 0) {
             
             for(Zuora.zObject usage : usageList) {
-
-                System.debug(' ===== MS ===== Found Usage: ' + usage);
-                System.debug(' ===== MS ===== Found Usage ChargeNumber: ' + usage.getValue('ChargeNumber'));
                 
                 if(checkUsageZuoraId((String) usage.getValue('Id')) == false){
                 
