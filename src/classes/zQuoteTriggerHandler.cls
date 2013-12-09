@@ -48,8 +48,7 @@ public with sharing class zQuoteTriggerHandler {
                 , CSR_Email__c
                 , zqu__Opportunity__r.Account.X2013_Vertical__c
                 , zqu__Opportunity__r.Account.Backlot_Account_ID__c
-                //, zqu__Opportunity__r.Account.AdditionalBacklotIDs__c
-                //, zqu__Opportunity__r.Account.CSM_Owner__C
+                , zqu__Opportunity__r.Account.CSM_Owner__c
             FROM 
                 zqu__Quote__c 
             WHERE 
@@ -65,8 +64,7 @@ public with sharing class zQuoteTriggerHandler {
                 zAccount.setValue('Id', uQuote.zqu__ZuoraAccountID__c);
                 zAccount.setValue('Vertical__c', uQuote.zqu__Opportunity__r.Account.X2013_Vertical__c);
                 zAccount.setValue('BacklotID__c', uQuote.zqu__Opportunity__r.Account.Backlot_Account_ID__c);
-                // zAccount.setValue('AdditionalBacklotIDs__c', uQuote.zqu__Opportunity__r.Account.AdditionalBacklotIDs__c);
-                zAccount.setValue('CustomerServiceRepName', uQuote.CSR__C);
+                zAccount.setValue('CustomerServiceRepName', uQuote.zqu__Opportunity__r.Account.CSM_Owner__c);
                 zAccount.setValue('CSR_Email__c', uQuote.CSR_Email__C);
                 zAccounts.add(zAccount);
             }

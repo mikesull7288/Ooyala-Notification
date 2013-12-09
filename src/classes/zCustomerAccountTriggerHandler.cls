@@ -23,7 +23,6 @@ public class zCustomerAccountTriggerHandler{
             }
             
             if( (newMap.get(acct.Id).Vertical__c != oldMap.get(acct.Id).Vertical__c) ||
-                (newMap.get(acct.Id).Zuora__Account__r.Backlot_Account_ID__c != oldMap.get(acct.Id).Zuora__Account__r.Backlot_Account_ID__c) ||
                 (newMap.get(acct.Id).BacklotID__c != oldMap.get(acct.Id).BacklotID__c) ||
                 (newMap.get(acct.Id).Zuora__CustomerServiceRepName__c != oldMap.get(acct.Id).Zuora__CustomerServiceRepName__c) ||
                 (newMap.get(acct.Id).Zuora__SalesRepName__c != oldMap.get(acct.Id).Zuora__SalesRepName__c) ){
@@ -84,6 +83,7 @@ public class zCustomerAccountTriggerHandler{
                 , Vertical__c
                 , BacklotID__c
                 , Zuora__Account__r.Backlot_Account_ID__c
+                , Zuora__Account__r.CSM_Owner__c
                 , Zuora__CustomerServiceRepName__c
                 , Zuora__SalesRepName__c
             FROM 
@@ -102,8 +102,7 @@ public class zCustomerAccountTriggerHandler{
                 updateAccount.setValue('Id', zuoraAccount.Zuora__Zuora_ID__c);
                 updateAccount.setValue('Vertical__c', zuoraAccount.Vertical__c);
                 updateAccount.setValue('BacklotID__c', zuoraAccount.BacklotID__c);
-                updateAccount.setValue('AdditionalBacklotIDs__c', zuoraAccount.Zuora__Account__r.Backlot_Account_ID__c);
-                updateAccount.setValue('CustomerServiceRepName', zuoraAccount.Zuora__CustomerServiceRepName__c);
+                updateAccount.setValue('CustomerServiceRepName', zuoraAccount.Zuora__Account__r.CSM_Owner__c);
                 updateAccounts.add(updateAccount);
             }
         }
