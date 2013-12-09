@@ -1,4 +1,4 @@
-trigger ZInvoiceTrigger on Zuora__ZInvoice__c (after insert, after update) {
+trigger zInvoiceTrigger on Zuora__ZInvoice__c (after insert, after update) {
     
     System.debug('===== MS ===== ZInvoiceTrigger: isInsert ['+ Trigger.isInsert +'] isAfter [' + Trigger.isAfter +']');
     System.debug('===== MS ===== invoicesFromTrigger : [' + Trigger.new +']');

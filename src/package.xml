@@ -5,8 +5,11 @@
         <members>Z_TestFactory</members>
         <members>zCustomerAccountTriggerHandler</members>
         <members>zCustomerAccountTriggerHandlerTest</members>
+        <members>zInvoiceBatchable</members>
+        <members>zInvoiceBatchableTest</members>
         <members>zInvoiceListComponentControlerTest</members>
         <members>zInvoiceListComponentController</members>
+        <members>zInvoiceScheduler</members>
         <members>zInvoiceTriggerHandlerTest</members>
         <members>zQuoteTriggerHandler</members>
         <members>zQuoteTriggerHandlerTest</members>
@@ -26,8 +29,8 @@
         <name>ApexComponent</name>
     </types>
     <types>
-        <members>ZInvoiceTrigger</members>
         <members>zCustomerAccountTriger</members>
+        <members>zInvoiceTrigger</members>
         <members>zQuoteTrigger</members>
         <name>ApexTrigger</name>
     </types>
