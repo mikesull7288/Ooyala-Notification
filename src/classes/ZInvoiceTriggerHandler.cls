@@ -23,7 +23,7 @@ public with sharing class ZInvoiceTriggerHandler {
      *
      */
 
-    public void SetFileds(MAP<Id,Zuora__ZInvoice__c> newMap, MAP<Id,Zuora__ZInvoice__c> oldMap, LIST<Zuora__ZInvoice__c> newInvoices, Boolean createTasks){
+    public void SetFileds(MAP<Id,Zuora__ZInvoice__c> newMap, MAP<Id,Zuora__ZInvoice__c> oldMap, LIST<Zuora__ZInvoice__c> newInvoices){
 //*
         if (firstRun == newMap.keySet()) {
             System.debug('Already ran!');
@@ -39,14 +39,14 @@ public with sharing class ZInvoiceTriggerHandler {
 
         Set<Zuora__CustomerAccount__c> acctountsToUpdate = new Set<Zuora__CustomerAccount__c>{};
 
-        List<Zuora__ZInvoice__c> invoicesFromTrigger = [SELECT Bill_To_Email__c, Zuora__Balance2__c, isDunning__c, Zuora__BillingAccount__r.isDunning__c, Zuora__DueDate__c, Days_Past_Due__c, Dunning_Status__c FROM Zuora__ZInvoice__c WHERE Id IN :newMap.keySet() ORDER BY Zuora__DueDate__c ASC, Zuora__Balance2__c ASC];
+        List<Zuora__ZInvoice__c> invoicesFromTrigger = [SELECT Zuora__Account__r.CSM_Owner__r.Email, CSM_Owner_Email__c, Bill_To_Email__c, Zuora__Balance2__c, CSM_Owner__c , isDunning__c, Zuora__BillingAccount__r.isDunning__c, Zuora__DueDate__c, Days_Past_Due__c, Dunning_Status__c FROM Zuora__ZInvoice__c WHERE Id IN :newMap.keySet() ORDER BY Zuora__DueDate__c ASC, Zuora__Balance2__c ASC];
         
         //For each committed invoice,
         for(Zuora__ZInvoice__c inv : invoicesFromTrigger){
 
 
             // ToDo Need to bulkify
-            List<Zuora__CustomerAccount__c> accts = [SELECT Zuora__Account__c, Zuora__Account__r.Id, Zuora__Balance__c, Zuora__Currency__c, Zuora__BillToWorkEmail__c, isDunning__c, name, surpressNotifications__c FROM Zuora__CustomerAccount__c WHERE Id = :inv.Zuora__BillingAccount__r.id limit 1];
+            List<Zuora__CustomerAccount__c> accts = [SELECT Zuora__Account__c, Zuora__Account__r.CSM_Owner__c, Zuora__CustomerServiceRepName__c, Zuora__Account__r.Id, Zuora__Balance__c, Zuora__Currency__c, Zuora__BillToWorkEmail__c, isDunning__c, name, surpressNotifications__c FROM Zuora__CustomerAccount__c WHERE Id = :inv.Zuora__BillingAccount__r.id limit 1];
             Zuora__CustomerAccount__c billAcct = accts[0];
 
             System.debug('===== MS ===== BEFORE LOGIC: Invoice Balance: ['+inv.Zuora__Balance2__c+'], Bill To Email: ['+ inv.Bill_To_Email__c +'], Account isDunning: ['+inv.Zuora__BillingAccount__r.isDunning__c+'] Dunning Ststus: [' + inv.Dunning_Status__c + ']' );
@@ -101,10 +101,11 @@ public with sharing class ZInvoiceTriggerHandler {
 
             }
             
+            
             DateTime today = DateTime.now();
             String todayStr = today.format('MM/DD/YYYY');
-
-             if ( (oldMap != null) && (oldMap.get(inv.id) != null) ){
+            
+            if ( (oldMap != null) && (oldMap.get(inv.id) != null) ){
             
                 if((oldMap.get(inv.id).Dunning_Status__c != '5 Day Email Sent' && newMap.get(inv.id).Dunning_Status__c == '5 Day Email Sent')){
                     // create 5 Day Notice task for Activiy History
@@ -233,6 +234,11 @@ public with sharing class ZInvoiceTriggerHandler {
             if(inv.Bill_To_Email__c == null){
                 inv.Bill_To_Email__c = billAcct.Zuora__BillToWorkEmail__c;
                 // invoicesToUpdate.add(inv);
+                processed = true;
+            }
+            
+            if( inv.CSM_Owner_Email__c == null ){
+                inv.CSM_Owner_Email__c = inv.Zuora__Account__r.CSM_Owner__r.Email;
                 processed = true;
             }
             
