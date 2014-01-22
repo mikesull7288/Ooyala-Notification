@@ -74,7 +74,7 @@ public class Z_TestFactory {
         testQuote.zqu__ZuoraAccountID__c = 'Zuora-000123';
         
         testQuote.zqu__Opportunity__c = testOpp.Id;
-        
+        testQuote.zqu__Subscription_Term_Type__c = 'Termed';
         insert testQuote;
         return testQuote;
     }
