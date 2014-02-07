@@ -53,6 +53,30 @@ private class zInvoiceTriggerHandlerTest {
         
         
     }
+    
+    @isTest static void test_Volume() {
+        // Implement test code
+        Account acct = Z_TestFactory.makeAccount();
+        Zuora__CustomerAccount__c zacct = Z_TestFactory.makeZAccount(acct);
+        insert zacct;
+        zacct.isDunning__c = true;
+        update zacct;
+        List<Zuora__ZInvoice__c> testInvList = new List<Zuora__ZInvoice__c>();
+        for(Integer i=0;i<=1000;i++){
+            Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
+            testInvList.add(testInv);
+        }
+        insert testInvList;
+        
+        for(Zuora__ZInvoice__c inv : testInvList){
+            
+            inv.Zuora__Balance2__c = 0;
+            inv.isDunning__c = true;
+        }
+            
+        update testInvList;
+        
+    }
      
     @isTest static void test_Invoice_5_Day_Email_Sent() {
         // Implement test code
@@ -69,7 +93,7 @@ private class zInvoiceTriggerHandlerTest {
         testInv.CSM_Owner_Email__c = 'CSM@test.com';
         testInv.Dunning_Status__c = '5 Day Email Sent';
         insert testInv;
-        testInv.Dunning_Status__c = '5 Day Email Sent';
+        testInv.Dunning_Status__c = '14 Day Email Sent';
         update testInv;
            
     }
@@ -89,6 +113,8 @@ private class zInvoiceTriggerHandlerTest {
         testInv.CSM_Owner_Email__c = 'CSM@test.com';
         testInv.Dunning_Status__c = '14 Day Email Sent';
         insert testInv;
+        testInv.Dunning_Status__c = '21 Day Email Sent';
+        update testInv;
            
     }
     
@@ -107,7 +133,9 @@ private class zInvoiceTriggerHandlerTest {
         testInv.CSM_Owner_Email__c = 'CSM@test.com';
         testInv.Dunning_Status__c = '21 Day Email Sent';
         insert testInv;
-           
+        testInv.Dunning_Status__c = '5 Day Email Sent';
+        update testInv;
+        
     }
     
 }
