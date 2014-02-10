@@ -3,6 +3,8 @@
     <types>
         <members>ZInvoiceTriggerHandler</members>
         <members>Z_TestFactory</members>
+        <members>zAccountTriggerHandler</members>
+        <members>zAccountTriggerHandlerTest</members>
         <members>zCustomerAccountTriggerHandler</members>
         <members>zCustomerAccountTriggerHandlerTest</members>
         <members>zInvoiceBatchable</members>
@@ -29,6 +31,7 @@
         <name>ApexComponent</name>
     </types>
     <types>
+        <members>zAccountTrigger</members>
         <members>zCustomerAccountTriger</members>
         <members>zInvoiceTrigger</members>
         <members>zQuoteTrigger</members>

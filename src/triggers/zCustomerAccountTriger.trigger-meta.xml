@@ -6,5 +6,5 @@
         <minorNumber>61</minorNumber>
         <namespace>Zuora</namespace>
     </packageVersions>
-    <status>Active</status>
+    <status>Inactive</status>
 </ApexTrigger>
