@@ -24,6 +24,9 @@ private class zInvoiceTriggerHandlerTest {
         Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
         insert testInv;
         
+        System.assert(zacct.isDunning__c == false, 'Account in dunning!!');
+        System.assert(testInv.isDunning__c == false, 'Inv in dunning!!');
+        
         
     }
     
@@ -37,6 +40,29 @@ private class zInvoiceTriggerHandlerTest {
         Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
         insert testInv;
         
+        System.assert(testInv.isDunning__c == false, 'Test Invoice put in Dunning');
+//        testInv.Zuora__Balance2__c = 0;
+        
+        
+    }
+    
+    
+        @isTest static void test_Invoice_to_ZeroBalance() {
+        // Implement test code
+        Account acct = Z_TestFactory.makeAccount();
+        Zuora__CustomerAccount__c zacct = Z_TestFactory.makeZAccount(acct);
+        insert zacct;
+        //update zacct;
+        Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
+        insert testInv;
+        System.assert(testInv.isDunning__c == true, 'Test Invoice NOT put in Dunning');
+
+        testInv.Zuora__Balance2__c = 0;
+        //testInv.isDunning__c = true;
+        update testInv;
+
+        System.assert(testInv.isDunning__c == false, 'Test Invoice STILL in Dunning');
+        System.assert(zacct.isDunning__c == false, 'Test Account STILL in Dunning');
         
     }
     
@@ -48,9 +74,11 @@ private class zInvoiceTriggerHandlerTest {
         update zacct;
         Zuora__ZInvoice__c testInv = Z_TestFactory.makeZInvoice(acct, zacct);
         testInv.Zuora__Balance2__c = 0;
-        testInv.isDunning__c = true;
+        //testInv.isDunning__c = true;
         insert testInv;
         
+        System.assert(zacct.isDunning__c == false, 'Account STILL in dunning!!');
+        System.assert(testInv.isDunning__c == false, 'Inv still dunning!!');
         
     }
     

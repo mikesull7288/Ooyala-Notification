@@ -1,12 +1,12 @@
 {
     "username": "ooyalabilling@ooyala.com", 
-    "environment": "sandbox", 
     "project_name": "Ooyala-ReportingSandbox", 
-    "workspace": "/Users/msullivan/Documents/workspaces/mavensmate", 
     "org_url": "", 
     "namespace": "", 
+    "metadata_container": "1dcS000000007WJIAY", 
+    "environment": "sandbox", 
+    "workspace": "/Users/msullivan/Documents/workspaces/mavensmate", 
     "id": "0RXY3XFL9WQ8P5GX9U3IPY6U1OY56K9X", 
-    "metadata_container": "1dcS000000006CwIAI", 
     "subscription": [
         "ApexClass", 
         "ApexComponent", 

@@ -17,6 +17,9 @@ private class zQuoteTriggerHandlerTest {
         Opportunity opp = Z_TestFactory.makeOpportunity(acct);
         zqu__Quote__c quote = Z_TestFactory.makeQuote(opp);
 
+        Zuora__CustomerAccount__c zAcct = Z_TestFactory.makeZAccount(acct);
+        insert zAcct;
+
         quote.zqu__Status__c='Sent to Z-Billing';
         acct.X2013_Vertical__c = 'exception';
         update acct;
@@ -28,6 +31,9 @@ private class zQuoteTriggerHandlerTest {
         Contact contc = Z_TestFactory.makeContact(acct);
         Opportunity opp = Z_TestFactory.makeOpportunity(acct);
         zqu__Quote__c quote = Z_TestFactory.makeQuote(opp);
+
+        Zuora__CustomerAccount__c zAcct = Z_TestFactory.makeZAccount(acct);
+        insert zAcct;
 
         quote.zqu__Status__c='Sent to Z-Billing';
         acct.X2013_Vertical__c = 'exception1';
