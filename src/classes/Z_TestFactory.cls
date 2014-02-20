@@ -112,6 +112,7 @@ public class Z_TestFactory {
         inv.Zuora__BillingAccount__c = billAcc.Id;
         inv.Zuora__Balance2__c = 100.00;
         inv.Zuora__DueDate__c = date.newInstance(1960, 2, 17);
+        inv.isDunning__c = false;
 
         // insert inv
         return inv;

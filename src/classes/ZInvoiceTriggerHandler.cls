@@ -267,7 +267,6 @@ public with sharing class ZInvoiceTriggerHandler {
             }
 
             System.debug('===== MS ===== AFTER LOGIC: Invoice Balance: ['+inv.Zuora__Balance2__c+'], Bill To Email: ['+ inv.Bill_To_Email__c +'], isDunning: ['+inv.isDunning__c+']');
-            System.debug('===== MS ===== AFTER LOGIC: Account isDunning: [' + inv.Zuora__BillingAccount__r.isDunning__c + ']');
 
         }       
 
@@ -280,6 +279,8 @@ public with sharing class ZInvoiceTriggerHandler {
 
 
 /****** Update Accounts *******/
+
+        System.debug('===== MS ===== AFTER LOGIC: Accounts to dunn: [' + billingAcctountsToDun.size() + ']');
 
         List<Zuora__CustomerAccount__c> dunningUpdateList = [
             SELECT
@@ -303,9 +304,14 @@ public with sharing class ZInvoiceTriggerHandler {
 
             acct.isDunning__c = true;
 
+            System.debug('===== MS ===== AFTER LOGIC: Account to update isDunning: [' + acct.name + ']');
+
         }
 
         update dunningUpdateList;
+
+
+        System.debug('===== MS ===== AFTER LOGIC: Accounts to dunn: [' + billingAcctountsToUnDun.size() + ']');        
 
         List<Zuora__CustomerAccount__c> undunningUpdateList = [
             SELECT
@@ -328,6 +334,8 @@ public with sharing class ZInvoiceTriggerHandler {
         for(Zuora__CustomerAccount__c acct : undunningUpdateList){
 
             acct.isDunning__c = false;
+
+            System.debug('===== MS ===== AFTER LOGIC: Account to update NOT isDunning: [' + acct.name + ']');
 
         }
 
