@@ -5,6 +5,8 @@ public class zAccountTriggerHandler{
         List<String> acctsToUpdate = new List<String>();
         
         for(Account acct : newAccts){
+            if (!newMap.containsKey(acct.Id) || !oldMap.containsKey(acct.Id))
+                continue;
             
             if( (newMap.get(acct.Id).X2013_Vertical__c != oldMap.get(acct.Id).X2013_Vertical__c) ||
                 (newMap.get(acct.Id).Backlot_Account_ID__c != oldMap.get(acct.Id).Backlot_Account_ID__c) ||
@@ -63,14 +65,21 @@ public class zAccountTriggerHandler{
  
         for(Account acct : acctsList){
             testStr = acct.X2013_Vertical__c;
-            String zuoraId = zBillingAcctMap.get(acct.Id).Zuora__Zuora_ID__c;
-            if( (zuoraId!=null) && (!Test.isRunningTest()) ) {
-                Zuora.zObject updateAccount = new Zuora.zObject('Account');
-                updateAccount.setValue('Id', zuoraId);
-                updateAccount.setValue('Vertical__c', acct.X2013_Vertical__c);
-                updateAccount.setValue('BacklotID__c', acct.Backlot_Account_ID__c);
-                updateAccount.setValue('CustomerServiceRepName', acct.CSM_Owner__r.Name);
-                updateAccounts.add(updateAccount);
+            Zuora__CustomerAccount__c billingAcct = zBillingAcctMap.get(acct.Id);
+            if(billingAcct != null ) {
+                String zuoraId;
+                if (zBillingAcctMap.containsKey(acct.Id))
+                    zuoraId = zBillingAcctMap.get(acct.Id).Zuora__Zuora_ID__c;
+                else
+                    continue;
+                if( (zuoraId!=null) && (!Test.isRunningTest()) ) {
+                    Zuora.zObject updateAccount = new Zuora.zObject('Account');
+                    updateAccount.setValue('Id', zuoraId);
+                    updateAccount.setValue('Vertical__c', acct.X2013_Vertical__c);
+                    updateAccount.setValue('BacklotID__c', acct.Backlot_Account_ID__c);
+                    updateAccount.setValue('CustomerServiceRepName', acct.CSM_Owner__r.Name);
+                    updateAccounts.add(updateAccount);
+                }
             }
         }
  
@@ -103,12 +112,8 @@ public class zAccountTriggerHandler{
             for (Zuora.zApi.SaveResult result : results) {
                 if (result.Success){
                     //Success
-                } else { /*
-                    Zuora.zObject[] errors = result.errors;
-                    for (Zuora.zObject error : errors) {
-                        //Failure
-                    } 
-                    // */
+                } else { 
+                    // report errors here
                 }
             }
         } catch (Zuora.zRemoteException ex) {

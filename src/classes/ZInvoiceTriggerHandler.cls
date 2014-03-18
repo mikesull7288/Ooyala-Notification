@@ -1,9 +1,10 @@
-public with sharing class ZInvoiceTriggerHandler {
+public with sharing class zInvoiceTriggerHandler {
     public static Set<ID> firstRun = null;
+    private String billingUserID;
     
 
-    public ZInvoiceTriggerHandler() {
-        
+    public zInvoiceTriggerHandler() {
+        billingUserID = getOoyalaBillingUser();
     }
 
     /*
@@ -24,15 +25,15 @@ public with sharing class ZInvoiceTriggerHandler {
      */
 
     public void SetFileds(MAP<Id,Zuora__ZInvoice__c> newMap, MAP<Id,Zuora__ZInvoice__c> oldMap, LIST<Zuora__ZInvoice__c> newInvoices){
-//*
+
         if (firstRun == newMap.keySet()) {
-            System.debug('Already ran!');
+            System.debug('===== MS ===== Already ran!!!');
             return;            
         } else {
 
             firstRun = newMap.keySet();
         }
-//*/
+
         Boolean processed = false;
 
         Set<Zuora__ZInvoice__c> invoicesToUpdate = new Set<Zuora__ZInvoice__c>{};
@@ -40,36 +41,11 @@ public with sharing class ZInvoiceTriggerHandler {
         Set<String> billingAcctountsToDun = new Set<String>{};
         Set<String> billingAcctountsToUnDun = new Set<String>{};
 
-        List<Zuora__ZInvoice__c> invoicesFromTrigger = [
-            SELECT
-                  Zuora__Account__r.CSM_Owner__r.Email
-                , CSM_Owner_Email__c, Bill_To_Email__c
-                , Zuora__Balance2__c
-                , CSM_Owner__c
-                , isDunning__c
-                , Zuora__BillingAccount__r.surpressNotifications__c
-                , Zuora__BillingAccount__r.isDunning__c
-                , Zuora__BillingAccount__r.Zuora__Balance__c
-                , Zuora__BillingAccount__r.Zuora__Currency__c
-                , Zuora__BillingAccount__r.Zuora__Account__r.Id
-                , Zuora__BillingAccount__r.name
-                , Zuora__BillingAccount__r.Zuora__BillToWorkEmail__c
-                , Zuora__DueDate__c
-                , Days_Past_Due__c
-                , Dunning_Status__c 
-            FROM
-                 Zuora__ZInvoice__c 
-            WHERE
-                 Id IN :newMap.keySet()
-            ORDER BY
-                   Zuora__DueDate__c ASC
-                 , Zuora__Balance2__c ASC
-            ]; 
+        List<Zuora__ZInvoice__c> invoicesFromTrigger = getInvoicesFromTrigger(newMap.keySet());
         
         
         //For each committed invoice,
         for(Zuora__ZInvoice__c inv : invoicesFromTrigger){
-            System.debug('===== MS ===== BEFORE LOGIC: Invoice Balance: ['+inv.Zuora__Balance2__c+'], Bill To Email: ['+ inv.Bill_To_Email__c +'], Account isDunning: ['+inv.Zuora__BillingAccount__r.isDunning__c+'] Dunning Ststus: [' + inv.Dunning_Status__c + ']' );
 
             if(inv.Zuora__BillingAccount__r.surpressNotifications__c){
                 // Do not send notifications
@@ -79,40 +55,31 @@ public with sharing class ZInvoiceTriggerHandler {
             // first check to see if an invoice has a positive balance.
             if(inv.Zuora__Balance2__c > 0  && inv.Days_Past_Due__c > 0){
                 // If there is a positive balance, 
-                
                 if( !inv.Zuora__BillingAccount__r.isDunning__c){
                     // and the billing account associated to the invoice is not currently engaged in a notification schedule, 
-                    
                     // then the Billing Account and Invoice will be flagged as isDunning, 
                     // to indicate that they are actively sending notifications.
-                    
                     if(!billingAcctountsToDun.contains(inv.Zuora__BillingAccount__c)){
                         inv.isDunning__c = true;
                         processed = true;
                         billingAcctountsToDun.add(inv.Zuora__BillingAccount__c);
-                    }
-                    
-                } /*else { // Account is already in dunning
-
-                    inv.isDunning__c = false;
-                    // invoicesToUpdate.add(inv);
-                    processed = true;
-                }   */
+                    }   
+                } 
 
             } else if(inv.Zuora__Balance2__c == 0){
+                System.debug('===== MS ===== $0 Balance on Invoice [' + inv +']');
                 // If the balance is zero, 
-
                 if(inv.isDunning__c == true){
                     // and the invoice is currently engaged in a dunning process,
                     inv.isDunning__c = false; // the isDunning flag on the invoice is set to False.
                     // take the Account out of dunning
                     if(!billingAcctountsToUnDun.contains(inv.Zuora__BillingAccount__c)){
+                        System.debug('===== MS ===== Account to Undunn [' + inv.Zuora__BillingAccount__r.name +']');
                         billingAcctountsToUnDun.add(inv.Zuora__BillingAccount__c);
                     }
                     // invoicesToUpdate.add(inv);
                     processed = true;
                 }
-
             }
             
 /**** END Dunning Check *****/
@@ -122,131 +89,36 @@ public with sharing class ZInvoiceTriggerHandler {
             DateTime today = DateTime.now();
             String todayStr = today.format('MM/DD/YYYY');
             
-            if ( (oldMap != null) && (oldMap.get(inv.id) != null) ){
+            if ( (oldMap != null) && (oldMap.get(inv.id) != null) ) {
             
                 if((oldMap.get(inv.id).Dunning_Status__c != '5 Day Email Sent' && newMap.get(inv.id).Dunning_Status__c == '5 Day Email Sent')){
-                    // create 5 Day Notice task for Activiy History
-    
-                    List<Task> tasks = new List<Task>();
-                    tasks.add(new Task(
-                        ActivityDate = Date.today(),
-                        Subject='Your Invoice is 5 days past due',
-                        WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
-                        OwnerId = UserInfo.getUserId(),
-                        Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of'+ inv.Zuora__BillingAccount__r.Zuora__Balance__c + ' ' + inv.Zuora__BillingAccount__r.Zuora__Currency__c +' on your account as of ' + todayStr +'. Please see the chart below for a summary of the past due invoices for ' + inv.Zuora__BillingAccount__r.name + ' and please remit payment as soon as possible.\n'
-                                    + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
-                                    + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
-                        Status='Completed'));
-                        
-                    System.debug('===== MS ===== insterting tasks [' + tasks + ']');  
-    
-                    insert tasks;
-    
+                    insert buildTask('5 Day Email Sent', inv);
                 }
                 
                 if((oldMap.get(inv.id).Dunning_Status__c != '14 Day Email Sent' && newMap.get(inv.id).Dunning_Status__c == '14 Day Email Sent')){
-                    // create 5 Day Notice task for Activiy History
-    
-                    List<Task> tasks = new List<Task>();
-                    tasks.add(new Task(
-                        ActivityDate = Date.today(),
-                        Subject='Your Invoice is 14 days past due',
-                        WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
-                        OwnerId = UserInfo.getUserId(),
-                        Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of on your account as of ' + todayStr + '. Please see the chart below for a summary of the past due invoices for and please remit payment as soon as possible.If we do not receive payment on your open balance, your account may be disabled due to payment delinquency.'
-                                    + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
-                                    + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
-                        Status='Completed'));
-                        
-                    System.debug('===== MS ===== insterting tasks [' + tasks + ']');  
-    
-                    insert tasks;
-    
+                    insert buildTask('14 Day Email Sent', inv);
                 }
                 
                 if((oldMap.get(inv.id).Dunning_Status__c != '21 Day Email Sent' && newMap.get(inv.id).Dunning_Status__c == '21 Day Email Sent')){
-                    // create 5 Day Notice task for Activiy History
-    
-                    List<Task> tasks = new List<Task>();
-                    tasks.add(new Task(
-                        ActivityDate = Date.today(),
-                        Subject='Your Invoice is 21 days past due',
-                        WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
-                        OwnerId = UserInfo.getUserId(),
-                        Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of on your account as of ' + todayStr + '. If we do not receive payment on your open balance, your account will be disabled once your invoice is 30 days past due.'
-                                    + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
-                                    + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
-                        Status='Completed'));
-                        
-                    System.debug('===== MS ===== insterting tasks [' + tasks + ']');  
-    
-                    insert tasks;
-    
+                    insert buildTask('21 Day Email Sent', inv);
                 }
-            } else {
+            } 
+            else {// check dunning status of new invoice
             
                 if((newMap.get(inv.id).Dunning_Status__c == '5 Day Email Sent')){
-                    // create 5 Day Notice task for Activiy History
-    
-                    List<Task> tasks = new List<Task>();
-                    tasks.add(new Task(
-                        ActivityDate = Date.today(),
-                        Subject='Your Invoice is 5 days past due',
-                        WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
-                        OwnerId = UserInfo.getUserId(),
-                        Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of'+ inv.Zuora__BillingAccount__r.Zuora__Balance__c + ' ' + inv.Zuora__BillingAccount__r.Zuora__Currency__c +' on your account as of ' + todayStr +'. Please see the chart below for a summary of the past due invoices for ' + inv.Zuora__BillingAccount__r.name + ' and please remit payment as soon as possible.\n'
-                                    + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
-                                    + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
-                        Status='Completed'));
-                        
-                    System.debug('===== MS ===== insterting tasks [' + tasks + ']');  
-    
-                    insert tasks;
-    
+                    insert buildTask('5 Day Email Sent', inv);
                 }
                 
                 if((newMap.get(inv.id).Dunning_Status__c == '14 Day Email Sent')){
-                    // create 5 Day Notice task for Activiy History
-    
-                    List<Task> tasks = new List<Task>();
-                    tasks.add(new Task(
-                        ActivityDate = Date.today(),
-                        Subject='Your Invoice is 14 days past due',
-                        WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
-                        OwnerId = UserInfo.getUserId(),
-                        Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of on your account as of ' + todayStr + '. Please see the chart below for a summary of the past due invoices for and please remit payment as soon as possible.If we do not receive payment on your open balance, your account may be disabled due to payment delinquency.'
-                                    + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
-                                    + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
-                        Status='Completed'));
-                        
-                    System.debug('===== MS ===== insterting tasks [' + tasks + ']');  
-    
-                    insert tasks;
-    
+                    insert buildTask('14 Day Email Sent', inv);
                 }
                 
                 if((newMap.get(inv.id).Dunning_Status__c == '21 Day Email Sent')){
-                    // create 5 Day Notice task for Activiy History
-    
-                    List<Task> tasks = new List<Task>();
-                    tasks.add(new Task(
-                        ActivityDate = Date.today(),
-                        Subject='Your Invoice is 21 days past due',
-                        WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
-                        OwnerId = UserInfo.getUserId(),
-                        Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of on your account as of ' + todayStr + '. If we do not receive payment on your open balance, your account will be disabled once your invoice is 30 days past due.'
-                                    + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
-                                    + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
-                        Status='Completed'));
-                        
-                    System.debug('===== MS ===== insterting tasks [' + tasks + ']');  
-    
-                    insert tasks;
-    
+                    insert buildTask('21 Day Email Sent', inv);
                 }
             }
             
-/**** END Check Dunning Status *****/
+/**** END Check Dunning Status for Actvivty History *****/
 
              // If the bill to email is not set, set it from the Billing Account BillTo Work Email
 
@@ -265,23 +137,104 @@ public with sharing class ZInvoiceTriggerHandler {
                 invoicesToUpdate.add(inv);
                 processed = false;
             }
-
-            System.debug('===== MS ===== AFTER LOGIC: Invoice Balance: ['+inv.Zuora__Balance2__c+'], Bill To Email: ['+ inv.Bill_To_Email__c +'], isDunning: ['+inv.isDunning__c+']');
-
         }       
 
         List<Zuora__ZInvoice__c> invoiceList = new List<Zuora__ZInvoice__c>{};
         
         invoiceList.addAll(invoicesToUpdate);
-        System.debug('===== MS ===== AFTER LOGIC: invoicesToUpdate size: [' + invoiceList + ']');    
+        
         update invoiceList; 
-        System.debug('===== MS ===== AFTER UPDATE: invoicesToUpdate size: [' + [SELECT Bill_To_Email__c, Zuora__Balance2__c, isDunning__c, Zuora__BillingAccount__r.isDunning__c FROM Zuora__ZInvoice__c WHERE Id IN :newMap.keySet()] + ']');    
+        
 
 
-/****** Update Accounts *******/
+    /****** Update Accounts *******/
 
-        System.debug('===== MS ===== AFTER LOGIC: Accounts to dunn: [' + billingAcctountsToDun.size() + ']');
+    System.debug('===== MS ===== AFTER LOGIC: Accounts to dunn: [' + billingAcctountsToDun.size() + ']');
+    unDunningUpate(billingAcctountsToUnDun);
 
+    System.debug('===== MS ===== AFTER LOGIC: Accounts to undunn: [' + billingAcctountsToUnDun.size() + ']');
+    dunningAcctUpdate(billingAcctountsToDun);
+
+    }
+
+
+    private Task buildTask(String dunning_status, Zuora__ZInvoice__c inv){
+            
+        DateTime today = DateTime.now();
+        String todayStr = today.format('MM/DD/YYYY');
+        Task task;
+        if(dunning_status == '5 Day Email Sent'){
+            // create 5 Day Notice task for Activiy History
+            task = new Task(
+                ActivityDate = Date.today(),
+                Subject='Your Invoice is 5 days past due',
+                WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
+                OwnerId = billingUserID,
+                Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of'+ inv.Zuora__BillingAccount__r.Zuora__Balance__c + ' ' + inv.Zuora__BillingAccount__r.Zuora__Currency__c +' on your account as of ' + todayStr +'. Please see the chart below for a summary of the past due invoices for ' + inv.Zuora__BillingAccount__r.name + ' and please remit payment as soon as possible.\n'
+                            + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
+                            + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
+                Status='Completed');
+        } else if (dunning_status == '14 Day Email Sent'){
+            // create 14 Day Notice task for Activiy History
+            task = new Task(
+            ActivityDate = Date.today(),
+            Subject='Your Invoice is 14 days past due',
+            WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
+            OwnerId = billingUserID,
+            Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of on your account as of ' + todayStr + '. Please see the chart below for a summary of the past due invoices for and please remit payment as soon as possible.If we do not receive payment on your open balance, your account may be disabled due to payment delinquency.\n'
+                        + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
+                        + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
+            Status='Completed');
+        } else if (dunning_status == '21 Day Email Sent'){
+            // create 21 Day Notice task for Activiy History
+            task = new Task(
+            ActivityDate = Date.today(),
+            Subject='Your Invoice is 21 days past due',
+            WhatId = inv.Zuora__BillingAccount__r.Zuora__Account__r.Id,
+            OwnerId = billingUserID,
+            Description = 'Dear Sir/Madam,\nThis is an automated reminder about the outstanding balance of on your account as of ' + todayStr + '. If we do not receive payment on your open balance, your account will be disabled once your invoice is 30 days past due.\n'
+                        + getInvoiceTable(inv.Zuora__BillingAccount__r.Id)
+                        + '\n\nKindly send your remittance to the following:\nACH/Wire Transfer Instructions\nSilicon Valley Bank \n3003 Tasman Drive Santa Clara, CA 95054 USA\nRouting & Transit #: 121140399 \nAccount #: 3300816316 \nSWIFT Code: SVBKUS6S\nMake Checks Payable To\nOoyala, Inc. Dept LA \n23905 Pasadena, CA 91185 - 3905 \nUSA\nThank you for your business.\nSincerely,\nOoyala Billing Team',
+            Status='Completed');
+        }
+
+        return task;
+    }
+
+
+    private List<Zuora__ZInvoice__c> getInvoicesFromTrigger(Set<Id> invIds){
+
+        return [
+            SELECT
+                  Zuora__Account__r.CSM_Owner__r.Email
+                , CSM_Owner_Email__c
+                , Bill_To_Email__c
+                , Zuora__Balance2__c
+                , Zuora__TotalAmount__c
+                , CSM_Owner__c
+                , isDunning__c
+                , Zuora__BillingAccount__r.surpressNotifications__c
+                , Zuora__BillingAccount__r.isDunning__c
+                , Zuora__BillingAccount__r.Zuora__Balance__c
+                , Zuora__BillingAccount__r.Zuora__Currency__c
+                , Zuora__BillingAccount__r.Zuora__Account__r.Id
+                , Zuora__BillingAccount__r.name
+                , Zuora__BillingAccount__r.Zuora__BillToWorkEmail__c
+                , Zuora__DueDate__c
+                , Days_Past_Due__c
+                , Dunning_Status__c 
+            FROM
+                 Zuora__ZInvoice__c 
+            WHERE
+                 Zuora__TotalAmount__c != 0 AND
+                 Id IN :invIds
+            ORDER BY
+                   Zuora__DueDate__c ASC
+                 , Zuora__Balance2__c ASC
+            ]; 
+    }
+
+    private void dunningAcctUpdate(SET<String> billingAcctountsToDun){
         List<Zuora__CustomerAccount__c> dunningUpdateList = [
             SELECT
                   Zuora__Account__c
@@ -301,18 +254,13 @@ public with sharing class ZInvoiceTriggerHandler {
             ];
 
         for(Zuora__CustomerAccount__c acct : dunningUpdateList){
-
-            acct.isDunning__c = true;
-
             System.debug('===== MS ===== AFTER LOGIC: Account to update isDunning: [' + acct.name + ']');
-
+            acct.isDunning__c = true;
         }
-
         update dunningUpdateList;
-
-
-        System.debug('===== MS ===== AFTER LOGIC: Accounts to dunn: [' + billingAcctountsToUnDun.size() + ']');        
-
+    }
+    
+    private void unDunningUpate(SET<String> billingAcctountsToUnDun){    
         List<Zuora__CustomerAccount__c> undunningUpdateList = [
             SELECT
                   Zuora__Account__c
@@ -332,26 +280,20 @@ public with sharing class ZInvoiceTriggerHandler {
             ];
 
         for(Zuora__CustomerAccount__c acct : undunningUpdateList){
-
-            acct.isDunning__c = false;
-
             System.debug('===== MS ===== AFTER LOGIC: Account to update NOT isDunning: [' + acct.name + ']');
-
+            acct.isDunning__c = false;
         }
-
         update undunningUpdateList;
-                
     }
 
-
-     private String getInvoiceTable (String billingAccountID) {
+    private String getInvoiceTable (String billingAccountID) {
 
         String invtable = '\n\nInvoice Number     Invoice Balance     Invoice Date     Payment Terms     Invoice Due Date     Days Past Due\n';
 
-      List<Zuora__ZInvoice__c> invList = [
-          SELECT Name, Zuora__Balance2__c, Zuora__DueDate__c, Zuora__InvoiceDate__c, Zuora__PaymentTerm__c, Days_Past_Due__c
-          FROM Zuora__ZInvoice__c
-          WHERE Zuora__BillingAccount__r.Id = :billingAccountID AND Zuora__Balance2__c > 0
+        List<Zuora__ZInvoice__c> invList = [
+         SELECT Name, Zuora__Balance2__c, Zuora__DueDate__c, Zuora__InvoiceDate__c, Zuora__PaymentTerm__c, Days_Past_Due__c
+         FROM Zuora__ZInvoice__c
+         WHERE Zuora__BillingAccount__r.Id = :billingAccountID AND Zuora__Balance2__c > 0
         ];
 
         for(Zuora__ZInvoice__c inv : invList) {
@@ -359,5 +301,20 @@ public with sharing class ZInvoiceTriggerHandler {
         }
 
         return invtable;
+    }
+
+    private String getOoyalaBillingUser () {
+
+        List<User> userList = [
+            SELECT ID, Name 
+            FROM User 
+            WHERE Name = 'Ooyala Billing' 
+            limit 1
+            ];
+
+        String userID = userList[0].ID;
+
+        return userID;
+
     }
 }

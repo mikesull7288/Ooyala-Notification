@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>ZInvoiceTriggerHandler</members>
         <members>Z_TestFactory</members>
         <members>zAccountTriggerHandler</members>
         <members>zAccountTriggerHandlerTest</members>
@@ -12,6 +11,7 @@
         <members>zInvoiceListComponentControlerTest</members>
         <members>zInvoiceListComponentController</members>
         <members>zInvoiceScheduler</members>
+        <members>zInvoiceTriggerHandler</members>
         <members>zInvoiceTriggerHandlerTest</members>
         <members>zQuoteTriggerHandler</members>
         <members>zQuoteTriggerHandlerTest</members>

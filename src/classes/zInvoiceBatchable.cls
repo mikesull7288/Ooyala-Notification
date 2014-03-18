@@ -6,11 +6,11 @@ global with sharing class zInvoiceBatchable implements Database.Batchable<sObjec
         String soql = 'SELECT Zuora__Balance2__c, Zuora__Account__c, Zuora__BillingAccount__r.isDunning__c, Zuora__DueDate__c, Zuora__Zuora_Id__c, isDunning__c '
                 + 'FROM Zuora__ZInvoice__c '
                 + 'WHERE Zuora__Balance2__c > 0';
-        if(Test.isRunningTest()){
-            soql += ' AND Zuora__Zuora_Id__c like \'TESTzInv-%\'';
-        }
+        //if(Test.isRunningTest()){
+        //    soql += ' AND Zuora__Zuora_Id__c like \'TESTzInv-%\'';
+        //}
 
-        System.debug('***** query = ' + soql);
+      
         
         return Database.getQueryLocator(soql);
     
@@ -22,7 +22,7 @@ global with sharing class zInvoiceBatchable implements Database.Batchable<sObjec
     }
     
     global void finish(Database.BatchableContext BC){
-        System.debug('===== MS =====: ZInvoiceBatchable.finish();');
+    
    }
 
 }

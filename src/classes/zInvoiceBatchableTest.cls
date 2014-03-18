@@ -1,4 +1,4 @@
-@isTest(SeeAllData=true)
+@isTest(SeeAllData=false)
 public with sharing class zInvoiceBatchableTest {
     
     private static testmethod void test_ZInvoiceScheduler(){
@@ -22,9 +22,6 @@ public with sharing class zInvoiceBatchableTest {
         testInv.Zuora__DueDate__c = date.today();
         testInv.Zuora__Zuora_Id__c = 'TESTzInv-0001';
         insert testInv;
-
-        System.debug('===== MS ===== AFTER INSERT: ['+ [SELECT Bill_To_Email__c, Zuora__Balance2__c, isDunning__c, Zuora__BillingAccount__r.isDunning__c FROM Zuora__ZInvoice__c WHERE Id =: testInv.Id] + ']');
-        System.debug('===== MS ===== AFTER INSERT: Zuora Billing Account isDunning: ['+  [SELECT Zuora__BillToWorkEmail__c, isDunning__c, surpressNotifications__c FROM Zuora__CustomerAccount__c WHERE Id = :zacct.id limit 1] +']');
         
         Test.startTest();
         zInvoiceBatchable nlb = new zInvoiceBatchable();

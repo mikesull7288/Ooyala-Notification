@@ -10,7 +10,7 @@ public class zCustomerAccountTriggerHandler{
     String accountId;
     String test;
  
-    public void OnBeforeUpdate(Map<Id, Zuora__CustomerAccount__c> newMap, Map<Id, Zuora__CustomerAccount__c> oldMap, Zuora__CustomerAccount__c[] newAccts){
+    public void OnUpdate(Map<Id, Zuora__CustomerAccount__c> newMap, Map<Id, Zuora__CustomerAccount__c> oldMap, Zuora__CustomerAccount__c[] newAccts){
  
         List<String> zuoraAccountsToUpdate = new List<String>();
         List<String> accountsToCheckDunning = new List<String>();
@@ -46,23 +46,40 @@ public class zCustomerAccountTriggerHandler{
     
         List<Zuora__ZInvoice__c> invoicesToUpdate = new List<Zuora__ZInvoice__c>();
     
-        for(String acctId : accountIdList){
- 
-            List<Zuora__ZInvoice__c> invoices = [
-                 SELECT 
-                     Zuora__Balance2__c
-                     , Days_Past_Due__c   
-                 FROM
-                     Zuora__ZInvoice__c
-                 WHERE 
-                     Zuora__BillingAccount__r.Id =: acctId 
-                 AND Zuora__Balance2__c > 0
-                 AND Days_Past_Due__c > 0
-                 LIMIT 1
-            ];
-            
-            if((invoices.size() > 0)){
-               Zuora__ZInvoice__c dunningInvoice = invoices[0];
+        List<Zuora__ZInvoice__c> invoices = [
+             SELECT
+                   Zuora__BillingAccount__r.Id 
+                 , Zuora__Balance2__c
+                 , Days_Past_Due__c   
+             FROM
+                 Zuora__ZInvoice__c
+             WHERE 
+                 Zuora__BillingAccount__r.Id IN :accountIdList 
+             AND Zuora__Balance2__c > 0
+             AND Days_Past_Due__c > 0
+             ORDER BY
+               Zuora__DueDate__c DESC
+        ];
+
+        Map<String, List<Zuora__ZInvoice__c>> acctidInvoiceListMap = new Map<String, List<Zuora__ZInvoice__c>>();
+
+        for(Zuora__ZInvoice__c inv : invoices){
+            List<Zuora__ZInvoice__c> acctInvList = acctidInvoiceListMap.get(inv.Zuora__BillingAccount__r.Id);
+            if(acctInvList != null && acctInvList.size() > 0 ){
+                acctInvList.add(inv);
+                acctidInvoiceListMap.put(inv.Zuora__BillingAccount__r.Id, acctInvList);
+
+            } else {
+                acctInvList = new LIST<Zuora__ZInvoice__c>();
+                acctInvList.add(inv);
+                acctidInvoiceListMap.put(inv.Zuora__BillingAccount__r.Id, acctInvList);
+            }
+        }
+
+        for(String acctId : accountIdList){ 
+           List<Zuora__ZInvoice__c> acctInvs = acctidInvoiceListMap.get(acctId);
+            if((acctInvs.size() > 0)){
+               Zuora__ZInvoice__c dunningInvoice = acctInvs[0];
                dunningInvoice.isDunning__c = TRUE;
                 invoicesToUpdate.add(dunningInvoice);
             }
